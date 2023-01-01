@@ -576,7 +576,7 @@ wl_proxy_destroy(struct wl_proxy *proxy)
  */
 WL_EXPORT int
 wl_proxy_add_listener(struct wl_proxy *proxy,
-		      void (**implementation)(void), void *data)
+		      void (**implementation)(void), void *data, size_t impl_size)
 {
 	if (proxy->flags & WL_PROXY_FLAG_WRAPPER)
 		wl_abort("Proxy %p is a wrapper\n", proxy);

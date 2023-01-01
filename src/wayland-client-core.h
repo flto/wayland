@@ -187,7 +187,7 @@ wl_proxy_destroy(struct wl_proxy *proxy);
 
 int
 wl_proxy_add_listener(struct wl_proxy *proxy,
-		      void (**implementation)(void), void *data);
+		      void (**implementation)(void), void *data, size_t impl_size);
 
 const void *
 wl_proxy_get_listener(struct wl_proxy *proxy);

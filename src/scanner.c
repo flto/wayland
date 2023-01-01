@@ -1243,7 +1243,7 @@ emit_stubs(struct wl_list *message_list, struct interface *interface)
 			printf("struct wl_proxy *%s;\n\n"
 			       "\t%s = ", ret->name, ret->name);
 		}
-		printf("wl_proxy_marshal_flags("
+		printf("wl_proxy_marshal_array_flags("
 		       "(struct wl_proxy *) %s,\n"
 		       "\t\t\t %s_%s",
 		       interface->name,
@@ -1272,16 +1272,21 @@ emit_stubs(struct wl_list *message_list, struct interface *interface)
 			       interface->name);
 		printf(", %s", m->destructor ? "WL_MARSHAL_FLAG_DESTROY" : "0");
 
+		printf(", (union wl_argument[]) { ");
 		wl_list_for_each(a, &m->arg_list, link) {
+			char type_ch = "oiufsoah"[a->type];
+			const char *type_cast = "";
+			if (a->type == OBJECT)
+				type_cast = "(struct wl_object*)";
 			if (a->type == NEW_ID) {
 				if (a->interface_name == NULL)
-					printf(", interface->name, version");
-				printf(", NULL");
+					printf("{.s = interface->name}, {.u = version},");
+				printf("{.o = NULL}, ");
 			} else {
-				printf(", %s", a->name);
+				printf("{.%c = %s%s}, ", type_ch, type_cast, a->name);
 			}
 		}
-		printf(");\n");
+		printf(" });\n");
 
 		if (ret && ret->interface_name == NULL)
 			printf("\n\treturn (void *) %s;\n", ret->name);
@@ -1495,7 +1500,7 @@ emit_structs(struct wl_list *message_list, struct interface *interface, enum sid
 		   "%sconst struct %s_listener *listener, void *data)\n"
 		   "{\n"
 		   "\treturn wl_proxy_add_listener((struct wl_proxy *) %s,\n"
-		   "%s(void (**)(void)) listener, data);\n"
+		   "%s(void (**)(void)) listener, data, sizeof(*listener));\n"
 		   "}\n\n",
 		   interface->name, interface->name, interface->name,
 		   indent(14 + strlen(interface->name)),
